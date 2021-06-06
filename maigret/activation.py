@@ -8,13 +8,16 @@ from aiohttp import CookieJar
 class ParsingActivator:
     @staticmethod
     def twitter(site, logger, cookies={}):
-        headers = dict(site.headers)
-        del headers["x-guest-token"]
-        r = requests.post(site.activation["url"], headers=headers)
-        logger.info(r)
-        j = r.json()
-        guest_token = j[site.activation["src"]]
-        site.headers["x-guest-token"] = guest_token
+        try:
+             headers = dict(site.headers)
+             del headers["x-guest-token"]
+             r = requests.post(site.activation["url"], headers=headers)
+             logger.info(r)
+             j = r.json()
+             guest_token = j[site.activation["src"]]
+             site.headers["x-guest-token"] = guest_token
+        except BaseException as e:
+             logger.error(e)
 
     @staticmethod
     def vimeo(site, logger, cookies={}):
@@ -22,8 +25,12 @@ class ParsingActivator:
         if "Authorization" in headers:
             del headers["Authorization"]
         r = requests.get(site.activation["url"], headers=headers)
-        jwt_token = r.json()["jwt"]
-        site.headers["Authorization"] = "jwt " + jwt_token
+        try:
+            jwt_token = r.json()["jwt"]
+            site.headers["Authorization"] = "jwt " + jwt_token
+        except BaseException as e:
+            logger.error(e)
+        
 
     @staticmethod
     def spotify(site, logger, cookies={}):
@@ -31,7 +38,7 @@ class ParsingActivator:
         if "Authorization" in headers:
             del headers["Authorization"]
         r = requests.get(site.activation["url"])
-        bearer_token = r.json()["accessToken"]
+        bearer_token = r.json()["accessTtoken"]
         site.headers["authorization"] = f"Bearer {bearer_token}"
 
 
